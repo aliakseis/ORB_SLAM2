@@ -24,6 +24,7 @@
 #include<fstream>
 #include<chrono>
 #include<iomanip>
+#include<thread>
 
 #include<opencv2/core/core.hpp>
 
@@ -41,6 +42,9 @@ int main(int argc, char **argv)
         cerr << endl << "Usage: ./mono_kitti path_to_vocabulary path_to_settings path_to_sequence" << endl;
         return 1;
     }
+
+    try
+    {
 
     // Retrieve paths to images
     vector<string> vstrImageFilenames;
@@ -101,7 +105,7 @@ int main(int argc, char **argv)
             T = tframe-vTimestamps[ni-1];
 
         if(ttrack<T)
-            usleep((T-ttrack)*1e6);
+            std::this_thread::sleep_for(std::chrono::duration<double>(T-ttrack));
     }
 
     // Stop all threads
@@ -121,6 +125,12 @@ int main(int argc, char **argv)
     // Save camera trajectory
     SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");    
 
+    }
+    catch (const std::exception& ex)
+    {
+        std::cerr << ex.what() << '\n';
+        return 1;
+    }
     return 0;
 }
 
